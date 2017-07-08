@@ -1,0 +1,52 @@
+{
+  "name": "cryptracker",
+  "version": "1.0.0",
+  "main": "dist/bundle.js",
+  "author": "Loup Peluso <loup.peluso@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start-dockers": "docker start cryptracker-pg cryptracker-redis",
+    "stop-dockers": "docker stop cryptracker-pg cryptracker-redis",
+    "clean": "rm -rf uploads/*",
+    "dev-build": "node build/dev-build.js",
+    "predev": "npm run start-dockers",
+    "postdev": "concurrently \"npm run stop-dockers\" \"npm run clean\"",
+    "dev": "concurrently -p \"[{name}]\" -n \"BUILD,API\" -c \"bgBlue.bold,bgMagenta.bold\" --kill-others \"npm run dev-build\" \"nodemon dist/dev-bundle.js -w dist/*.*\"",
+    "resetdb": "knex migrate:rollback && knex migrate:latest"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "collections": "^5.0.6",
+    "decimal.js": "^7.2.3",
+    "express": "^4.15.3",
+    "immutable": "^3.8.1",
+    "ioredis": "^3.1.1",
+    "knex": "^0.13.0",
+    "moment": "^2.18.1",
+    "multer": "^1.3.0",
+    "objection": "^0.8.4",
+    "papaparse": "^4.3.3",
+    "pg": "^6.4.0",
+    "ramda": "^0.24.1",
+    "superagent": "^3.5.2"
+  },
+  "devDependencies": {
+    "@types/body-parser": "^1.16.3",
+    "@types/express": "^4.0.35",
+    "@types/ioredis": "^0.0.23",
+    "@types/knex": "^0.0.53",
+    "@types/node": "^7.0.29",
+    "@types/superagent": "^2.0.37",
+    "awesome-typescript-loader": "^3.1.3",
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-env": "^1.5.2",
+    "babel-preset-stage-3": "^6.24.1",
+    "concurrently": "^3.5.0",
+    "nodemon": "^1.11.0",
+    "source-map-support": "^0.4.15",
+    "typescript": "^2.3.4",
+    "webpack": "^2.6.1",
+    "webpack-node-externals": "^1.6.0"
+  }
+}
