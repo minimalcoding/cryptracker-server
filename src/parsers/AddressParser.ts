@@ -26,11 +26,11 @@ const blockCypherAddressParser = async (asset, address, location): Promise<Trans
         }
     }
     return R.pipe(
-        R.map(t => ({
+        R.map((t: any) => ({
             tx_hash: t.tx_hash,
             amount: Decimal(t.tx_input_n < 0 ? t.value : -t.value),
         })),
-        R.groupBy(t => t.tx_hash), R.values,
+        R.groupBy((t: any) => t.tx_hash), R.values,
         R.map(R.reduce((acc: any, t: any) => ({
             ...t,
             amount: acc.amount.add(t.amount),
@@ -68,12 +68,16 @@ const parseAddress = (asset, address, location): Promise<Transaction[]> => {
     throw new Error(`${asset} are not compatible with address import... yet :)`)
 }
 
-export const parseAddresses = async (data: any[]): Promise<Transaction[]> => {
-    let result: Transaction[] = [];
-    for (var key in data) {
-        const item = data[key];
-        const trList = await parseAddress(item.asset, item.address, item.location);
-        result = R.concat(result, trList);
+export default class AddressParser {
+    async parseAddresses(data: any[]): Promise<Transaction[]> {
+        let result: Transaction[] = [];
+        for (var key in data) {
+            const item = data[key];
+            const trList = await parseAddress(item.asset, item.address, item.location);
+            result = R.concat(result, trList);
+        }
+        return result;
     }
-    return result;
 }
+
+

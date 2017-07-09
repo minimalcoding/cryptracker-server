@@ -26,7 +26,7 @@ export class Transaction extends Model<TransactionDSO> {
     static tableName = 'transactions';
     coinCap: CoinCapApi;
 
-    static fromJS(input: {[key: string]: string}): Transaction {
+    static fromJS(input: any): Transaction {
         return new Transaction({
             ...input,
             time: moment(input.time || moment()),
@@ -67,11 +67,11 @@ export class Transaction extends Model<TransactionDSO> {
 
     async beforeSave() {
         if (!this.record.rate) {
-            const history = await this.coinCap.getAssetHistory(this.asset);
-            console.log(this.time.unix());
-            const parseTS = v => Decimal(v).div(1000);
-            const historyDic = R.reduce((a, p) => ({...a, [parseTS(p[0])]: p[1]}), {}, history.price);
-            console.log(R.aperture(2, R.keys(historyDic)));
+            // const history = await this.coinCap.getAssetHistory(this.asset);
+            // console.log(this.time.unix());
+            // const parseTS = v => Decimal(v).div(1000);
+            // const historyDic = R.reduce((a, p) => ({...a, [parseTS(p[0])]: p[1]}), {}, history.price);
+            // console.log(R.aperture(2, R.keys(historyDic)));
         }
     }
 };
