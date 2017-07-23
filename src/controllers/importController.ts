@@ -6,6 +6,7 @@ import * as Papa from 'papaparse';
 import piper from 'src/tools/piper';
 import PoloniexParser from 'src/parsers/PoloniexParser';
 import CoinbaseParser from 'src/parsers/CoinbaseParser';
+import BitfinexParser from 'src/parsers/BitfinexParser';
 import KrakenParser from 'src/parsers/KrakenParser';
 import AddressParser from 'src/parsers/AddressParser';
 import CSVParser from 'src/parsers/CSVParser';
@@ -21,13 +22,13 @@ const filesUpload = upload.fields([
     { name: 'exports' },
 ]);
 
-const processIncomingData = async (path: string): Promise<string[][]> => {
+const processDataFiles = async (path: string): Promise<string[][]> => {
     return (await Papa.parse(R.trim(await fs.readFileSync(path, 'utf-8')))).data;
 };
 
 const loadFiles = (files: UploadResult): Promise<string[][]>[] => {
     const paths = R.map(f => f.path, files.exports);
-    return R.map(p => processIncomingData(p), paths);
+    return R.map(p => processDataFiles(p), paths);
 };
 
 const fromFiles = async (Parser: new() => {parse: (input: string[][]) => Transaction[]}, data) => {
@@ -56,21 +57,31 @@ router.post('/address', piper(async (req, res) => {
     return res.sendStatus(204);
 }));
 
-// Poloniex is specific.
-const poloniexUpload = upload.fields([
+// Bitfinex is specific.
+const loadMultipleFiles = (files: UploadResult): { [key: string]: Promise<string[][]> } => {
+    return R.mapObjIndexed(imports => processDataFiles(R.head(imports).path), files);
+};
+
+const multipleUpload = upload.fields([
     { name: 'trades', maxCount: 1, },
     { name: 'deposits', maxCount: 1, },
     { name: 'withdrawals', maxCount: 1, },
+    { name: 'fundings', maxCount: 1, },
 ]);
-const loadPoloniexFiles = (files: UploadResult): { [key: string]: Promise<string[][]> } => {
-    return R.mapObjIndexed(imports => processIncomingData(R.head(imports).path), files);
-};
-router.post('/poloniex', poloniexUpload, piper(async (req, res) => {
+
+router.post('/poloniex', multipleUpload, piper(async (req, res) => {
     const parser = new PoloniexParser();
-    const { deposits, withdrawals, trades } = loadPoloniexFiles(req.files);
+    const { deposits, withdrawals, trades } = loadMultipleFiles(req.files);
     Transaction.createAll(parser.parseDeposits(await deposits));
     Transaction.createAll(parser.parseWithdrawals(await withdrawals));
     Transaction.createAll(parser.parseTrades(await trades));
+    return res.sendStatus(204);
+}));
+
+router.post('/bitfinex', multipleUpload, piper(async (req, res) => {
+    const parser = new BitfinexParser();
+    const { trades } = loadMultipleFiles(req.files);
+    console.log(parser.parseTrades(await trades));
     return res.sendStatus(204);
 }));
 

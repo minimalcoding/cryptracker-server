@@ -27,11 +27,12 @@ export default class KrakenParser {
                 case 'rollover':
                 case 'margin':
                     return 'margin';
+                case 'settled':
                 case 'deposit':
                 case 'withdrawal':
                     return 'move';
             }
-            return null;
+            throw new Error(`Kraken type '${krakenType}' is unkown`)
         }
 
         return R.pipe(
