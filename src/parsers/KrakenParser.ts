@@ -40,7 +40,7 @@ export default class KrakenParser {
                 return new Transaction({
                     id: md5(input[TXID]),
                     ref_id: input[TYPE] === 'trade' ? md5(input[REFID]) : null,
-                    asset: normalizeAsset(input[ASSET].slice(1)),
+                    asset: normalizeAsset(input[ASSET]),
                     time: moment(input[TIME]),
                     amount: Decimal(input[AMOUNT]).sub(input[FEE]),
                     fee: Decimal(input[FEE]),

@@ -69,7 +69,7 @@ const parseAddress = (asset, address, location): Promise<Transaction[]> => {
 }
 
 export default class AddressParser {
-    async parseAddresses(data: any[]): Promise<Transaction[]> {
+    async parse(data: any[]): Promise<Transaction[]> {
         let result: Transaction[] = [];
         for (var key in data) {
             const item = data[key];

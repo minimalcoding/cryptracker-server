@@ -7,6 +7,8 @@ import piper from 'src/tools/piper';
 import PoloniexParser from 'src/parsers/PoloniexParser';
 import CoinbaseParser from 'src/parsers/CoinbaseParser';
 import KrakenParser from 'src/parsers/KrakenParser';
+import AddressParser from 'src/parsers/AddressParser';
+import CSVParser from 'src/parsers/CSVParser';
 import {Transaction} from 'src/dao/Transaction';
 
 const upload = multer({ dest: 'uploads/' });
@@ -28,17 +30,29 @@ const loadFiles = (files: UploadResult): Promise<string[][]>[] => {
     return R.map(p => processIncomingData(p), paths);
 };
 
-const makeTransactions = async (Parser: new() => {parse: (input: string[][]) => Transaction[]}, data) => {
+const fromFiles = async (Parser: new() => {parse: (input: string[][]) => Transaction[]}, data) => {
     return R.flatten<Transaction>(R.map(f => new Parser().parse(f), await Promise.all(loadFiles(data))));
 }
 
 router.post('/coinbase', filesUpload, piper(async (req, res) => {
-    Transaction.createAll(await makeTransactions(CoinbaseParser, req.files));
+    Transaction.createAll(await fromFiles(CoinbaseParser, req.files));
     return res.sendStatus(204);
 }));
 
 router.post('/kraken', filesUpload, piper(async (req, res) => {
-    Transaction.createAll(await makeTransactions(KrakenParser, req.files));
+    Transaction.createAll(await fromFiles(KrakenParser, req.files));
+    return res.sendStatus(204);
+}));
+
+router.post('/csv', filesUpload, piper(async (req, res) => {
+    Transaction.createAll(await fromFiles(CSVParser, req.files));
+    return res.sendStatus(204);
+}));
+
+// Addresses
+router.post('/address', piper(async (req, res) => {
+    var parser = new AddressParser();
+    Transaction.createAll(await parser.parse(req.body));
     return res.sendStatus(204);
 }));
 

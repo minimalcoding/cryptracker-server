@@ -25,6 +25,9 @@ declare module 'ramda' {
     export function keys<V>(d: IDictionary<V>): string[];
     export function isEmpty<T>(array: T[]): Boolean;
 
+    export function is(type: any, value: any): Boolean;
+    export function is(type: any): (value: any) => Boolean;
+
     export function join(...input: any[]): any;
     export function groupBy(...input: any[]): any;
     export function concat(...input: any[]): any;
